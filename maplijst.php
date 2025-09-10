@@ -12,18 +12,25 @@ class Mappen
     public $items = array();
 }
 
+
+function voegMappenToe($pad, $relatiefPad, &$items) {
+    foreach (new DirectoryIterator($pad) as $fileInfo) {
+        if (!$fileInfo->isDot() && $fileInfo->isDir()) {
+            $mapNaam = $fileInfo->getFilename();
+            $volgendeRelatiefPad = $relatiefPad === '' ? $mapNaam : $relatiefPad . '/' . $mapNaam;
+            $myMap = new Map();
+            $myMap->naam = $volgendeRelatiefPad;
+            array_push($items, $myMap);
+            voegMappenToe($fileInfo->getPathname(), $volgendeRelatiefPad, $items);
+        }
+    }
+}
+
 function getMaplijst()
 {
     $myMappen = new Mappen();
     $myDir = getDataMap();
-    foreach (new DirectoryIterator($myDir) as $fileInfo) {
-        if (!$fileInfo->isDot()) {
-            $myMap = new Map();
-            $myMap->naam = $fileInfo->getFilename();
-            array_push($myMappen->items, $myMap);
-
-        }
-    }
+    voegMappenToe($myDir, '', $myMappen->items);
     SendJsonObject($myMappen);
 }
 
