@@ -24,7 +24,7 @@ function getStukLijst($aVersie, $aSortOrder, $aAlbumFilter, $aAuteurFilter)
 {
     $conn = getDBConnection();
     $cmd =
-        'select sv.id, s.map, s.titel, s.auteurId, s.albumId, s.nr, s.opmerkingen, a.naam as album, au.naam as auteur, ' .
+        'select s.id, sv.id as stukVersieId, sv.map, s.titel, s.auteurId, s.albumId, s.nr, s.opmerkingen, a.naam as album, au.naam as auteur, ' .
         sprintf('(select count(*) from %s p where p.stukVersieId = sv.id) as aantalPaginas ', tblPagina) .
         sprintf('from %s sv ', tblStukVersie) .
         sprintf('join %s s on s.id = sv.stukId and sv.versieNr = %d ', tblStuk, $aVersie) .
@@ -53,6 +53,7 @@ function getStukLijst($aVersie, $aSortOrder, $aAlbumFilter, $aAuteurFilter)
         while ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
             $myStuk = new Stuk();
             $myStuk->id = $row["id"];
+            $myStuk->stukVersieId = $row["stukVersieId"];
             $myStuk->titel = $row["titel"];
             $myStuk->map = $row["map"];
             $myStuk->album = $row["album"];
