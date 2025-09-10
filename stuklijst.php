@@ -1,20 +1,6 @@
 <?php
 require_once('apiConstants.php');
 require_once('apiProcs.php');
-/*
-function getLijst()
-{
-	$files = scandir(getDataMap());
-	$r = '';
-	for ($i = 0; $i <= count($files) - 1; $i++) {
-		$dir = $files[$i];
-		if (($dir != '.') && ($dir != '..'))
-			$r = $r . $dir . RegelEinde;
-	}
-	;
-	return $r;
-}
-*/
 
 class Stuk
 {
@@ -34,12 +20,14 @@ class Stukken
 }
 
 
-function getStukLijst($aSortOrder, $aAlbumFilter, $aAuteurFilter)
+function getStukLijst($aVersie, $aSortOrder, $aAlbumFilter, $aAuteurFilter)
 {
     $conn = getDBConnection();
     $cmd =
-        'select s.id, s.map, s.titel, s.auteurId, s.albumId, s.nr, s.opmerkingen, a.naam as album, au.naam as auteur, ' .
-        sprintf('(select count(*) from %s p where p.stukId = s.id) as aantalPaginas from %s s ', tblPagina, tblStuk) .
+        'select sv.id, s.map, s.titel, s.auteurId, s.albumId, s.nr, s.opmerkingen, a.naam as album, au.naam as auteur, ' .
+        sprintf('(select count(*) from %s p where p.stukVersieId = sv.id) as aantalPaginas ', tblPagina) .
+        sprintf('from %s sv ', tblStukVersie) .
+        sprintf('join %s s on s.id = sv.stukId and sv.versieNr = %d ', tblStuk, $aVersie) .
         sprintf('left join %s a on a.Id = s.albumId ', tblAlbum) .
         sprintf('left join %s au on au.Id = s.auteurId', tblAuteur);
     $myWhere = '';

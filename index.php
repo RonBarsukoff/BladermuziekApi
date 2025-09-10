@@ -4,7 +4,7 @@ require_once('apiProcs.php');
 $pagina = getGetVar('pagina');
 if ($pagina == 'stuklijst') {
     require_once('stuklijst.php');
-    $myStukken = getStukLijst(getGetVar('sortorder'), getGetVar('album'), getGetVar('auteur'));
+    $myStukken = getStukLijst(getGetVar('versie', 1), getGetVar('sortorder'), getGetVar('album'), getGetVar('auteur'));
     SendJsonObject($myStukken);
 } else if ($pagina == 'albumlijst') {
     require_once('albumlijst.php');
@@ -19,7 +19,7 @@ if ($pagina == 'stuklijst') {
     $stukid = getGetVar('stukid');
     if ($stukid != '') {
         require_once('paginas.php');
-        SendJsonObject(getPaginas($stukid));
+        SendJsonObject(getPaginas($stukid, getGetVar('versie', 1)));
     }
 } elseif ($pagina == 'ImageFilenames') {
     $map = getGetVar('map');
@@ -29,9 +29,10 @@ if ($pagina == 'stuklijst') {
     }
 } elseif ($pagina == 'pagina') {
     $stukId = getGetVar('stukId');
+    $versie = getGetVar('versie', 1);
     $paginaNr = getGetVar('paginaNr');
 	require_once('pagina.php');
-    getPagina($stukId, $paginaNr, getGetVar('hoogte'), getGetVar('breedte'));
+    getPagina($stukId, $versie, $paginaNr, getGetVar('hoogte'), getGetVar('breedte'));
 } elseif ($pagina == 'paginaByName') {
     $naam = getGetVar('naam');
     $map = getGetVar('map');

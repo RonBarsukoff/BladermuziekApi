@@ -1,6 +1,7 @@
 <?php
 
 define('tblStuk', 'stuk');
+define('tblStukVersie', 'stukVersie');
 define('tblAlbum', 'album');
 define('tblAuteur', 'auteur');
 define('tblPagina', 'pagina');

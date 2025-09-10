@@ -63,12 +63,12 @@ function MyLog($aMelding)
         error_log($aMelding . "\n", 3, LogFilename);
 }
 
-function getGetVar($aParam)
+function getGetVar($aParam, $aDefault = '')
 {
 	if (isset($_GET[$aParam]))
 		return $_GET[$aParam];
 	else
-		return '';
+		return $aDefault;
 }
 
 function getPostVar($aParam)

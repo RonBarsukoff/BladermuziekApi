@@ -2,12 +2,12 @@
 require_once('apiProcs.php');
 require_once('apiConstants.php');
 
-function getPagina($aStukId, $aPaginaNr, $aHoogte, $aBreedte)
+function getPagina($aStukId, $aVersieNr, $aPaginaNr, $aHoogte, $aBreedte)
 {
     if (($aStukId == '') or ($aPaginaNr == '')) {
         http_response_code(406);
     } else
-        doGetPagina($aStukId, $aPaginaNr, $aHoogte, $aBreedte);
+        doGetPagina($aStukId, $aVersieNr, $aPaginaNr, $aHoogte, $aBreedte);
 }
 
 function getPaginaByName($aNaam, $aMap, $aHoogte, $aBreedte) {
@@ -54,14 +54,14 @@ function verstuurImage($aFilename, $aMap, $aHoogte, $aBreedte) {
     }
 
 }
-function doGetPagina($aStukId, $aPaginaNr, $aHoogte, $aBreedte)
+function doGetPagina($aStukId, $aVersieNr, $aPaginaNr, $aHoogte, $aBreedte)
 {
     $conn = getDBConnection();
     if ($conn != null) {
         $rs = $conn->query(
-            sprintf('select p.*, s.map from %s p ', tblPagina) .
-            'join stuk s on s.id = p.stukId ' .
-            sprintf('where (stukId = %s) and (paginaNr = %s) ', $aStukId, $aPaginaNr)
+            sprintf('select p.*, sv.map from %s p ', tblPagina) .
+            sprintf('join %s sv on sv.id = p.stukVersieId ', tblStukVersie) .
+            sprintf('where (sv.stukId = %s) and (sv.versieNr = %s) and (p.paginaNr = %s) ', $aStukId, $aVersieNr, $aPaginaNr)
         );
         if ($rs) {
             if ($row = $rs->fetch_array(MYSQLI_ASSOC)) {

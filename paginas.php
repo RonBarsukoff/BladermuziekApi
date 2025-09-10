@@ -22,7 +22,7 @@ class Paginas
     }
 }
 
-function getPaginas($aStukId)
+function getPaginas($aStukId, $aVersie = 1)
 {
     $conn = getDBConnection();
     if ($conn == null) {
@@ -30,8 +30,9 @@ function getPaginas($aStukId)
     } else {
         $rs = $conn->query("
             select p.paginanr, p.bestandsnaam, s.map from pagina p
-            join stuk s on s.id = p.stukId
-            where p.stukId = $aStukId
+            join stukVersie sv on sv.id = p.stukVersieId and sv.versieNr = $aVersie
+            join stuk s on s.id = sv.stukId
+            where sv.stukId = $aStukId
         ");
         $myPaginas = new Paginas();
         while ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
