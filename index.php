@@ -6,9 +6,12 @@ if ($pagina == 'stuklijst') {
     require_once('stuklijst.php');
     $myStukken = getStukLijst(getGetVar('versie', 1), getGetVar('sortorder'), getGetVar('album'), getGetVar('auteur'));
     SendJsonObject($myStukken);
-} else if ($pagina == 'albumlijst') {
+} elseif ($pagina == 'albumlijst') {
     require_once('albumlijst.php');
     getAlbumlijst();
+} elseif ($pagina == 'getStuk') {
+    require_once('stuklijst.php');
+    getStuk(getGetVar('stukId', 0), getGetVar('versie', 1));
 } elseif ($pagina == 'auteurlijst') {
     require_once('auteurlijst.php');
     getAuteurlijst();

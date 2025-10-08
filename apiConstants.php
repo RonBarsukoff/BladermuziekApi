@@ -13,8 +13,12 @@ define('vnmAlbumId', 'albumId');
 define('vnmAuteurId', 'auteurId');
 define('vnmNr', 'nr');
 define('vnmStukId', 'stukId');
+define('vnmStukVersieId', 'stukVersieId');
 define('vnmPaginaNr', 'paginanr');
+define('vnmVersieNr', 'versieNr');
 
 define('vnmNaam', 'naam');
+
+define('errNietGevonden', 1001);
 
 ?>

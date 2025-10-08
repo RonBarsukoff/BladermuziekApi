@@ -16,23 +16,31 @@ function getPaginaByName($aNaam, $aMap, $aHoogte, $aBreedte) {
 
 function verstuurImage($aFilename, $aMap, $aHoogte, $aBreedte) {
     $full_file_name = getDataMap() . '/' . $aMap . '/' . $aFilename;
+    $ext = strtolower(pathinfo($full_file_name, PATHINFO_EXTENSION));
     if ($aBreedte == '')
         $aBreedte = 0;
     if ($aHoogte == '')
         $aHoogte = 0;
     if (($aHoogte == 0) and ($aBreedte == 0)) {
-        header("Content-Type: image/jpg");
+        if ($ext === 'png') {
+            header("Content-Type: image/png");
+        } else {
+            header("Content-Type: image/jpeg");
+        }
         header('Content-Length: ' . filesize($full_file_name));
         header("Content-Disposition: inline; filename=$aFilename");  
         readfile($full_file_name);
-
     }
     else {
+        $myPreviousErrorReporting = error_reporting();
         error_reporting(E_ERROR | E_PARSE);
-    // schaal het plaatje zo dat de afmetingen niet boven de opgegeven hoogte en/of breedte komen
-        $src = imagecreatefromjpeg($full_file_name);
+        // schaal het plaatje zo dat de afmetingen niet boven de opgegeven hoogte en/of breedte komen
+        if ($ext === 'png') {
+            $src = imagecreatefrompng($full_file_name);
+        } else {
+            $src = imagecreatefromjpeg($full_file_name);
+        }
         list($mySrcBreedte, $mySrcHoogte) = @getimagesize($full_file_name); // getimagesize geeft (mogelijk onterecht?) een warning/
-//        print($mySrcBreedte . ', ' . $mySrcHoogte);
         $mySchaalBreedte = $aBreedte / (int)$mySrcBreedte;
         $mySchaalHoogte = $aHoogte / (int)$mySrcHoogte;
         if ($mySchaalHoogte == 0)
@@ -45,12 +53,17 @@ function verstuurImage($aFilename, $aMap, $aHoogte, $aBreedte) {
         $myDstHoogte = $mySrcHoogte * $mySchaal;
         $dst = imagecreatetruecolor($myDstBreedte, $myDstHoogte);
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $myDstBreedte, $myDstHoogte, $mySrcBreedte, $mySrcHoogte);
-//        imagecopyresized($dst, $src, 0, 0, 0, 0, $myDstBreedte, $myDstHoogte, $mySrcBreedte, $mySrcHoogte);
-        header("Content-Type: image/jpg");
-//        header('Content-Length: ' . filesize($full_file_name));
-        header("Content-Disposition: inline; filename=$aFilename");
-//        error_reporting(E_ALL);
-        imagejpeg($dst, null, 100);  
+        if ($ext === 'png') {
+            header("Content-Type: image/png");
+            header("Content-Disposition: inline; filename=$aFilename");
+            error_reporting($myPreviousErrorReporting);
+            imagepng($dst);
+        } else {
+            header("Content-Type: image/jpeg");
+            header("Content-Disposition: inline; filename=$aFilename");
+            error_reporting($myPreviousErrorReporting);
+            imagejpeg($dst, null, 100);
+        }
     }
 
 }

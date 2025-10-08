@@ -55,11 +55,13 @@ function getPaginasInMap($aMap)
     $myPaginas = new Paginas();
     foreach ($myFilenames as $myFilename) {
         if (($myFilename != '.') && ($myFilename != '..')) {
-            $myPagina = new Pagina();
-            $myPagina->bestandsnaam = $myFilename;
             $full_file_name = getDataMap() . '/' . $aMap . '/' . $myFilename;
-            getImageFileInfo($full_file_name, $myPagina);
-            array_push($myPaginas->paginas, $myPagina);
+            if (is_file($full_file_name)) {
+                $myPagina = new Pagina();
+                $myPagina->bestandsnaam = $myFilename;
+                getImageFileInfo($full_file_name, $myPagina);
+                array_push($myPaginas->paginas, $myPagina);
+            }
         }
     }
     SendJsonObject($myPaginas);

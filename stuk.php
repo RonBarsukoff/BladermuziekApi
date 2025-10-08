@@ -59,14 +59,13 @@ function PostStuk($aData) {
         $cmd =
             sprintf('update %s set ', tblStuk) .
             sprintf('  %s=? ', vnmTitel) .
-            sprintf(', %s=? ', vnmMap) .
             sprintf(', %s=? ', vnmAuteurId) .
             sprintf(', %s=? ', vnmAlbumId) .
             sprintf(', %s=? ', vnmNr) .
             sprintf('where %s=?', vnmId);
         $statement = $conn->prepare($cmd);
         if ($statement) {
-            $statement->bind_param('ssiiii', $stuk->titel, $stuk->map, $stuk->auteurId, $stuk->albumId, $stuk->nr, $stuk->id);
+            $statement->bind_param('siiii', $stuk->titel, $stuk->auteurId, $stuk->albumId, $stuk->nr, $stuk->id);
             $statement->execute();
             if ($conn->errno)
                 SendResult(204, 'Fout ' . $conn->errno . ' ' . $conn->error);
@@ -74,10 +73,10 @@ function PostStuk($aData) {
         } else
             SendResult(201, "Fout in prepare");
     } else {
-        $cmd = sprintf('insert into %s (%s, %s, %s, %s, %s) values (?, ?, ?, ?, ?)', tblStuk, vnmTitel, vnmMap, vnmAuteurId, vnmAlbumId, vnmNr);
+        $cmd = sprintf('insert into %s (%s, %s, %s, %s) values (?, ?, ?, ?)', tblStuk, vnmTitel, vnmAuteurId, vnmAlbumId, vnmNr);
         $statement = $conn->prepare($cmd);
         if ($statement) {
-            $statement->bind_param('ssiii', $stuk->titel, $stuk->map, $stuk->auteurId, $stuk->albumId, $stuk->nr);
+            $statement->bind_param('siii', $stuk->titel, $stuk->auteurId, $stuk->albumId, $stuk->nr);
             $statement->execute();
             if ($conn->errno)
                 SendResult(203, 'Fout ' . $conn->errno . ' ' . $conn->error);
@@ -90,21 +89,55 @@ function PostStuk($aData) {
         } else
             SendResult(202, " Fout in prepare " . $cmd . ' ' . $conn->error);
     }
-    if (isset($stuk->paginas)) {
-        $cmd = sprintf('delete from %s where stukId = ?', tblPagina);
+
+    // stukversie toevoegen
+    if ($stuk->stukVersieId > 0) {
+        $cmd =
+            sprintf('update %s set ', tblStukVersie) .
+            sprintf('  %s=? ', vnmMap) .
+            sprintf('where %s=?', vnmId);
         $statement = $conn->prepare($cmd);
         if ($statement) {
-            $statement->bind_param('i', $stuk->id);
+            $statement->bind_param('si', $stuk->map, $stuk->stukVersieId);
+            $statement->execute();
+            if ($conn->errno)
+                SendResult(204, 'Fout ' . $conn->errno . ' ' . $conn->error);
+            $statement->close();
+        } else
+            SendResult(201, "Fout in prepare");
+    } else {
+        $cmd = sprintf('insert into %s (%s, %s, %s) values (?, ?, ?)', tblStukVersie, vnmStukId, vnmVersieNr, vnmMap);
+        $statement = $conn->prepare($cmd);
+        if ($statement) {
+            $statement->bind_param('iis', $stuk->id, $stuk->versie, $stuk->map);
+            $statement->execute();
+            if ($conn->errno)
+                SendResult(203, 'Fout ' . $conn->errno . ' ' . $conn->error);
+            else {
+                $rs = $conn->query('select last_insert_id() as id');
+                $row = $rs->fetch_array(MYSQLI_ASSOC);
+                $stuk->stukVersieId = $row['id'];
+            }
+            $statement->close();
+        } else
+            SendResult(202, " Fout in prepare " . $cmd . ' ' . $conn->error);
+    }
+
+    if (isset($stuk->paginas)) {
+        $cmd = sprintf('delete from %s where %s = ?', tblPagina, vnmStukVersieId);
+        $statement = $conn->prepare($cmd);
+        if ($statement) {
+            $statement->bind_param('i', $stuk->stukVersieId);
             $statement->execute();
             if ($conn->errno)
                 SendResult(203, 'Fout ' . $conn->errno . ' ' . $conn->error);
             $statement->close();
         }
-        $cmd = sprintf('insert into %s (stukId, bestandsnaam, paginaNr) values (?, ?, ?)', tblPagina);
+        $cmd = sprintf('insert into %s (%s, bestandsnaam, paginaNr) values (?, ?, ?)', tblPagina, vnmStukVersieId);
         $statement = $conn->prepare($cmd);
         if ($statement) {
             foreach ($stuk->paginas->items as $myPagina) {
-                $statement->bind_param('isi', $stuk->id, $myPagina->bestandsnaam, $myPagina->paginanr);
+                $statement->bind_param('isi', $stuk->stukVersieId, $myPagina->bestandsnaam, $myPagina->paginanr);
                 $statement->execute();
                 if ($conn->errno)
                     SendResult(203, 'Fout ' . $conn->errno . ' ' . $conn->error);

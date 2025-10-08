@@ -62,6 +62,7 @@ function getStukLijst($aVersie, $aSortOrder, $aAlbumFilter, $aAuteurFilter)
             $myStuk->auteur = $row["auteur"];
             $myStuk->auteurId = $row["auteurId"];
             $myStuk->aantalPaginas = $row["aantalPaginas"];
+            $myStuk->versie = $aVersie;
             array_push($myStukken->items, $myStuk);
         }
         $conn->close();
@@ -81,6 +82,34 @@ function CreateStukFromRecord($aRow) {
     $myStuk->auteurId = $aRow["auteurId"];
     $myStuk->aantalPaginas = $aRow["aantalPaginas"];
     return $myStuk;
+}
+
+function getStuk($aStukId, $aVersie)
+{
+    $conn = getDBConnection();
+    if ($conn != null) {
+        $rs = $conn->query(
+            sprintf('select s.id, sv.id as stukVersieId, sv.map, s.titel, s.auteurId, s.albumId, s.nr, s.opmerkingen, a.naam as album, au.naam as auteur, ', $aVersie) .
+            sprintf('(select count(*) from %s p where p.stukVersieId = sv.id) as aantalPaginas ', tblPagina) .
+            sprintf('from %s sv ', tblStukVersie) .
+            sprintf('join %s s on s.id = sv.stukId and sv.versieNr = %d ', tblStuk, $aVersie) .
+            sprintf('left join %s a on a.Id = s.albumId ', tblAlbum) .
+            sprintf('left join %s au on au.Id = s.auteurId ', tblAuteur) .
+            sprintf('where s.id = %d', $aStukId)
+        );
+        if ($rs) {
+            if ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
+                $myStuk = CreateStukFromRecord($row);
+                $myStuk->stukVersieId = $row["stukVersieId"];
+                $myStuk->versie = $aVersie;
+                SendJsonObject($myStuk);
+            } else {
+                SendResult(errNietGevonden, "Stuk $aStukId met versie $aVersie niet gevonden");
+            }
+        } else
+            SendResult(123, $conn->error);
+        $conn->close();
+    }
 }
 
 ?>
