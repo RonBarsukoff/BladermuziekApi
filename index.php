@@ -76,6 +76,18 @@ elseif ($pagina == 'postAlbum') {
     require_once('albumlijst.php');
     postAlbum($postData);
 }
+elseif ($pagina == 'stukTabel') {
+    require_once('tabellen.php');
+    sendStukTabel();
+}
+elseif ($pagina == 'stukVersieTabel') {
+    require_once('tabellen.php');
+    sendStukVersieTabel();
+}
+elseif ($pagina == 'paginaTabel') {
+    require_once('tabellen.php');
+    sendPaginaTabel();
+}
 else {
 #    http_response_code(404);
 #    header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");

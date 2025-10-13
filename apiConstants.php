@@ -14,10 +14,11 @@ define('vnmAuteurId', 'auteurId');
 define('vnmNr', 'nr');
 define('vnmStukId', 'stukId');
 define('vnmStukVersieId', 'stukVersieId');
-define('vnmPaginaNr', 'paginanr');
+define('vnmPaginaNr', 'paginaNr');
 define('vnmVersieNr', 'versieNr');
-
+define('vnmOpmerkingen', 'opmerkingen');
 define('vnmNaam', 'naam');
+define('vnmBestandsnaam', 'bestandsnaam');
 
 define('errNietGevonden', 1001);
 
