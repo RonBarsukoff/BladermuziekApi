@@ -55,7 +55,6 @@ if ($pagina == 'stuklijst') {
 }
 elseif ($pagina == 'postStuk') {
     $postData = getPostVar('stuk');
-    myLog("aData is " . $postData);
     if ($postData != '') {
         require_once('stuk.php');
         PostStuk($postData);

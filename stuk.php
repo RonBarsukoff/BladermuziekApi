@@ -232,8 +232,6 @@ function GetVolgendStuk($aStukId, $aVorige) {
             else
                 $cmd2 .= sprintf('(%s > ?) order by %s', vnmNr, vnmNr);
             $cmd2 .= ' limit 1';
-//            error_log($cmd2 . "\n", 3, 'c:\tijdelijk\phplog.txt');
-            MyLog($cmd2);
             $statement2 = $conn->prepare($cmd2);
             $statement2->bind_param('ii', $row[vnmAlbumId], $row[vnmNr]);
             $statement2->execute();
