@@ -1,18 +1,7 @@
 <?php
 require_once('apiConstants.php');
 require_once('apiProcs.php');
-
-class Stuk
-{
-    public $id;
-    public $titel;
-    public $map;
-    public $album;
-    public $albumId;
-    public $auteur;
-    public $auteurId;
-    public $aantalPaginas;
-}
+require_once('stuk.php');
 
 class Stukken
 {
@@ -67,58 +56,6 @@ function getStukLijst($aVersie, $aSortOrder, $aAlbumFilter, $aAuteurFilter)
         }
         $conn->close();
         return $myStukken;
-    }
-}
-
-function CreateStukFromRecord($aRow) {
-    $myStuk = new Stuk();
-    $myStuk->id = $aRow["id"];
-    $myStuk->titel = $aRow["titel"];
-    $myStuk->map = $aRow["map"];
-    $myStuk->album = $aRow["album"];
-    $myStuk->albumId = $aRow["albumId"];
-    $myStuk->nr = $aRow["nr"];
-    $myStuk->auteur = $aRow["auteur"];
-    $myStuk->auteurId = $aRow["auteurId"];
-    $myStuk->aantalPaginas = $aRow["aantalPaginas"];
-    return $myStuk;
-}
-
-function getStuk($aStukId, $aVersie)
-{
-    $conn = getDBConnection();
-    if ($conn != null) {
-        $sql = 'select s.id, sv.id as stukVersieId, sv.map, s.titel, s.auteurId, s.albumId, s.nr, s.opmerkingen, a.naam as album, au.naam as auteur, ' .
-               sprintf('(select count(*) from %s p where p.stukVersieId = sv.id) as aantalPaginas ', tblPagina) .
-               sprintf('from %s sv ', tblStukVersie) .
-               sprintf('join %s s on s.id = sv.stukId and sv.versieNr = ? ', tblStuk) .
-               sprintf('left join %s a on a.Id = s.albumId ', tblAlbum) .
-               sprintf('left join %s au on au.Id = s.auteurId ', tblAuteur) .
-               'where s.id = ?';
-        
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
-            $stmt->bind_param("ii", $aVersie, $aStukId);
-            $stmt->execute();
-            $rs = $stmt->get_result();
-            
-            if ($rs) {
-                if ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
-                    $myStuk = CreateStukFromRecord($row);
-                    $myStuk->stukVersieId = $row["stukVersieId"];
-                    $myStuk->versie = $aVersie;
-                    SendJsonObject($myStuk);
-                } else {
-                    SendResult(errNietGevonden, "Stuk $aStukId met versie $aVersie niet gevonden");
-                }
-            } else {
-                SendResult(123, "Fout bij uitvoeren query: " . $conn->error);
-            }
-            $stmt->close();
-        } else {
-            SendResult(123, "Fout bij prepare statement: " . $conn->error);
-        }
-        $conn->close();
     }
 }
 

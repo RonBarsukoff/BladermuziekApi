@@ -21,7 +21,7 @@ if ($pagina == 'stuklijst') {
     require_once('albumlijst.php');
     getAlbumlijst();
 } elseif ($pagina == 'getStuk') {
-    require_once('stuklijst.php');
+    require_once('stuk.php');
     getStuk(getGetVar('stukId', 0), getGetVar('versie', 1));
 } elseif ($pagina == 'auteurlijst') {
     require_once('auteurlijst.php');
