@@ -1,6 +1,17 @@
 <?php
 require_once('apiProcs.php');
 
+// Log incoming headers voor debugging
+// MyLog("=== REQUEST DEBUG ===");
+// MyLog("Request method: " . $_SERVER['REQUEST_METHOD']);
+// MyLog("Content-Type: " . (isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : 'NOT SET'));
+// MyLog("Content-Length: " . (isset($_SERVER['CONTENT_LENGTH']) ? $_SERVER['CONTENT_LENGTH'] : 'NOT SET'));
+// MyLog("POST data count: " . count($_POST));
+// if (!empty($_POST)) {
+//     MyLog("POST keys: " . implode(', ', array_keys($_POST)));
+// }
+// MyLog("Raw input length: " . strlen(file_get_contents('php://input')));
+
 $pagina = getGetVar('pagina');
 if ($pagina == 'stuklijst') {
     require_once('stuklijst.php');
@@ -44,8 +55,14 @@ if ($pagina == 'stuklijst') {
 }
 elseif ($pagina == 'postStuk') {
     $postData = getPostVar('stuk');
-    require_once('stuk.php');
-    PostStuk($postData);
+    myLog("aData is " . $postData);
+    if ($postData != '') {
+        require_once('stuk.php');
+        PostStuk($postData);
+    }
+    else {
+        http_response_code(406);
+    }
 } elseif ($pagina == 'verwijderStuk') {
     $postData = getPostVar('stuk');
     require_once('stuk.php');

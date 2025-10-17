@@ -29,7 +29,7 @@ function getPaginas($aStukId, $aVersie = 1)
         echo 'Fout bij het openen van de connectie';
     } else {
         $rs = $conn->query("
-            select p.paginanr, p.bestandsnaam, sv.map from pagina p
+            select p.paginaNr, p.bestandsnaam, sv.map from pagina p
             join stukVersie sv on sv.id = p.stukVersieId and sv.versieNr = $aVersie
             join stuk s on s.id = sv.stukId
             where sv.stukId = $aStukId
