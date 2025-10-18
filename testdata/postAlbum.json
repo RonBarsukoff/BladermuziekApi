@@ -1,0 +1,10 @@
+{
+    "tabel": {
+        "naam": "album",
+        "actie": "toevoegen",
+        "velden": [
+            {"veldnaam": "naam",
+            "waarde": "Populaire Muziek twee (2)"}
+        ]
+    }
+}

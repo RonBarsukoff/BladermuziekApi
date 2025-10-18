@@ -21,5 +21,6 @@ define('vnmNaam', 'naam');
 define('vnmBestandsnaam', 'bestandsnaam');
 
 define('errNietGevonden', 1001);
+define('errParameterFout', 1002);
 
 ?>
