@@ -67,24 +67,27 @@ function toevoegenRecord($aConn, $aTabelNaam, $aRecord) {
         implode(', ', $velden),
         implode(', ', $placeholders));
     
-    $stmt = $aConn->prepare($cmd);
-    if (!$stmt) {
-        SendResult(errDatabase, 'Fout bij prepare insert: ' . $aConn->error);
-    }
-    
-    // Dynamisch bind_param aanroepen
-    if (!empty($waarden)) {
-        $stmt->bind_param($types, ...$waarden);
-    }
-    
-    if (!$stmt->execute()) {
+    try {
+        $stmt = $aConn->prepare($cmd);
+        if (!$stmt) {
+            SendResult(errDatabase, 'Fout bij prepare insert: ' . $aConn->error);
+        }
+        
+        // Dynamisch bind_param aanroepen
+        if (!empty($waarden)) {
+            $stmt->bind_param($types, ...$waarden);
+        }
+        
+        $stmt->execute();
+        $nieuwId = $stmt->insert_id;
         $stmt->close();
-        SendResult(errDatabase, 'Fout bij insert: ' . $stmt->error);
+        return $nieuwId;
+    } catch (mysqli_sql_exception $e) {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
+        SendResult(errDatabase, 'Fout bij insert: ' . $e->getMessage());
     }
-    
-    $nieuwId = $stmt->insert_id;
-    $stmt->close();
-    return $nieuwId;
 }
 
 function wijzigenRecord($aConn, $aTabelNaam, $aRecord) {
@@ -124,26 +127,29 @@ function wijzigenRecord($aConn, $aTabelNaam, $aRecord) {
         $aTabelNaam,
         implode(', ', $veldenSet));
     
-    $stmt = $aConn->prepare($cmd);
-    if (!$stmt) {
-        $aConn->close();
-        SendResult(errDatabase, 'Fout bij prepare update: ' . $aConn->error);
-    }
-    
-    // Dynamisch bind_param aanroepen
-    if (!empty($waarden)) {
-        $stmt->bind_param($types, ...$waarden);
-    }
-    
-    if (!$stmt->execute()) {
+    try {
+        $stmt = $aConn->prepare($cmd);
+        if (!$stmt) {
+            $aConn->close();
+            SendResult(errDatabase, 'Fout bij prepare update: ' . $aConn->error);
+        }
+        
+        // Dynamisch bind_param aanroepen
+        if (!empty($waarden)) {
+            $stmt->bind_param($types, ...$waarden);
+        }
+        
+        $stmt->execute();
+        $aantalGewijzigd = $stmt->affected_rows;
         $stmt->close();
+        return $aantalGewijzigd;
+    } catch (mysqli_sql_exception $e) {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
         $aConn->close();
-        SendResult(errDatabase, 'Fout bij update: ' . $stmt->error);
+        SendResult(errDatabase, 'Fout bij update: ' . $e->getMessage());
     }
-    
-    $aantalGewijzigd = $stmt->affected_rows;
-    $stmt->close();
-    return $aantalGewijzigd;
 }
 
 function verwijderenRecord($aConn, $aTabelNaam, $aRecord) {
@@ -162,24 +168,27 @@ function verwijderenRecord($aConn, $aTabelNaam, $aRecord) {
     
     $cmd = sprintf('delete from %s where id = ?', $aTabelNaam);
     
-    $stmt = $aConn->prepare($cmd);
-    if (!$stmt) {
-        $aConn->close();
-        SendResult(errDatabase, 'Fout bij prepare delete: ' . $aConn->error);
-    }
-    
-    $type = is_int($idWaarde) ? 'i' : 's';
-    $stmt->bind_param($type, $idWaarde);
-    
-    if (!$stmt->execute()) {
+    try {
+        $stmt = $aConn->prepare($cmd);
+        if (!$stmt) {
+            $aConn->close();
+            SendResult(errDatabase, 'Fout bij prepare delete: ' . $aConn->error);
+        }
+        
+        $type = is_int($idWaarde) ? 'i' : 's';
+        $stmt->bind_param($type, $idWaarde);
+        
+        $stmt->execute();
+        $aantalVerwijderd = $stmt->affected_rows;
         $stmt->close();
+        return $aantalVerwijderd;
+    } catch (mysqli_sql_exception $e) {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
         $aConn->close();
-        SendResult(errDatabase, 'Fout bij delete: ' . $stmt->error);
+        SendResult(errDatabase, 'Fout bij delete: ' . $e->getMessage());
     }
-    
-    $aantalVerwijderd = $stmt->affected_rows;
-    $stmt->close();
-    return $aantalVerwijderd;
 }
 
 function bewaarRecord($postData) {
