@@ -69,7 +69,7 @@ function toevoegenRecord($aConn, $aTabelNaam, $aRecord) {
     
     $stmt = $aConn->prepare($cmd);
     if (!$stmt) {
-        SendResult(1, 'Fout bij prepare insert: ' . $aConn->error);
+        SendResult(errDatabase, 'Fout bij prepare insert: ' . $aConn->error);
     }
     
     // Dynamisch bind_param aanroepen
@@ -79,7 +79,7 @@ function toevoegenRecord($aConn, $aTabelNaam, $aRecord) {
     
     if (!$stmt->execute()) {
         $stmt->close();
-        SendResult(1, 'Fout bij insert: ' . $stmt->error);
+        SendResult(errDatabase, 'Fout bij insert: ' . $stmt->error);
     }
     
     $nieuwId = $stmt->insert_id;
@@ -127,7 +127,7 @@ function wijzigenRecord($aConn, $aTabelNaam, $aRecord) {
     $stmt = $aConn->prepare($cmd);
     if (!$stmt) {
         $aConn->close();
-        SendResult(1, 'Fout bij prepare update: ' . $aConn->error);
+        SendResult(errDatabase, 'Fout bij prepare update: ' . $aConn->error);
     }
     
     // Dynamisch bind_param aanroepen
@@ -138,7 +138,7 @@ function wijzigenRecord($aConn, $aTabelNaam, $aRecord) {
     if (!$stmt->execute()) {
         $stmt->close();
         $aConn->close();
-        SendResult(1, 'Fout bij update: ' . $stmt->error);
+        SendResult(errDatabase, 'Fout bij update: ' . $stmt->error);
     }
     
     $aantalGewijzigd = $stmt->affected_rows;
@@ -165,7 +165,7 @@ function verwijderenRecord($aConn, $aTabelNaam, $aRecord) {
     $stmt = $aConn->prepare($cmd);
     if (!$stmt) {
         $aConn->close();
-        SendResult(1, 'Fout bij prepare delete: ' . $aConn->error);
+        SendResult(errDatabase, 'Fout bij prepare delete: ' . $aConn->error);
     }
     
     $type = is_int($idWaarde) ? 'i' : 's';
@@ -174,7 +174,7 @@ function verwijderenRecord($aConn, $aTabelNaam, $aRecord) {
     if (!$stmt->execute()) {
         $stmt->close();
         $aConn->close();
-        SendResult(1, 'Fout bij delete: ' . $stmt->error);
+        SendResult(errDatabase, 'Fout bij delete: ' . $stmt->error);
     }
     
     $aantalVerwijderd = $stmt->affected_rows;
