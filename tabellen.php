@@ -43,60 +43,107 @@ function sendTabel($aTabelNaam) {
 }
 
 function toevoegenRecord($aConn, $aTabelNaam, $aRecord) {
-    $velden = '';
-    $waarden = '';
+    $velden = array();
+    $waarden = array();
+    $placeholders = array();
+    $types = '';
+    
     foreach ($aRecord as $key => $value) {
-        if ($velden != '') {
-            $velden .= ', ';
-            $waarden .= ', ';
+        $velden[] = $value->veldnaam;
+        $waarden[] = $value->waarde;
+        $placeholders[] = '?';
+        // Bepaal type: i=integer, d=double, s=string
+        if (is_int($value->waarde)) {
+            $types .= 'i';
+        } elseif (is_float($value->waarde)) {
+            $types .= 'd';
+        } else {
+            $types .= 's';
         }
-        $velden .= $value->veldnaam;
-        $waarden .= "'" . $aConn->real_escape_string($value->waarde) . "'";
     }
+    
     $cmd = sprintf('insert into %s (%s) values (%s)', 
         $aTabelNaam, 
-        $velden,
-        $waarden);
-    if (!$aConn->query($cmd)) {
-        SendResult(1, 'Fout bij insert: ' . $aConn->error);
+        implode(', ', $velden),
+        implode(', ', $placeholders));
+    
+    $stmt = $aConn->prepare($cmd);
+    if (!$stmt) {
+        SendResult(1, 'Fout bij prepare insert: ' . $aConn->error);
     }
-    else {
-        return $aConn->insert_id;
+    
+    // Dynamisch bind_param aanroepen
+    if (!empty($waarden)) {
+        $stmt->bind_param($types, ...$waarden);
     }
+    
+    if (!$stmt->execute()) {
+        $stmt->close();
+        SendResult(1, 'Fout bij insert: ' . $stmt->error);
+    }
+    
+    $nieuwId = $stmt->insert_id;
+    $stmt->close();
+    return $nieuwId;
 }
 
 function wijzigenRecord($aConn, $aTabelNaam, $aRecord) {
-    $veldenSet = '';
+    $veldenSet = array();
+    $waarden = array();
+    $types = '';
     $idWaarde = '';
+    
     foreach ($aRecord as $key => $value) {
         if ($value->veldnaam == 'id') {
             $idWaarde = $value->waarde;
         }
         else {
-            if ($veldenSet != '') {
-                $veldenSet .= ', ';
+            $veldenSet[] = $value->veldnaam . ' = ?';
+            $waarden[] = $value->waarde;
+            // Bepaal type: i=integer, d=double, s=string
+            if (is_int($value->waarde)) {
+                $types .= 'i';
+            } elseif (is_float($value->waarde)) {
+                $types .= 'd';
+            } else {
+                $types .= 's';
             }
-            $veldenSet .= sprintf('%s = \'%s\'', 
-                $value->veldnaam,
-                $aConn->real_escape_string($value->waarde));
         }
     }
+    
     if ($idWaarde == '') {
         $aConn->close();
         SendResult(errParameterFout, 'id ontbreekt bij wijzigen');
     }
-    $cmd = sprintf('update %s set %s where id = %s',
+    
+    // Voeg id toe aan parameters
+    $waarden[] = $idWaarde;
+    $types .= is_int($idWaarde) ? 'i' : 's';
+    
+    $cmd = sprintf('update %s set %s where id = ?',
         $aTabelNaam,
-        $veldenSet,
-        $aConn->real_escape_string($idWaarde));
-    if (!$aConn->query($cmd)) {
+        implode(', ', $veldenSet));
+    
+    $stmt = $aConn->prepare($cmd);
+    if (!$stmt) {
         $aConn->close();
-        SendResult(1, 'Fout bij update: ' . $aConn->error);
+        SendResult(1, 'Fout bij prepare update: ' . $aConn->error);
     }
-    else {
-        $aantalGewijzigd = $aConn->affected_rows;
-        return $aantalGewijzigd;
+    
+    // Dynamisch bind_param aanroepen
+    if (!empty($waarden)) {
+        $stmt->bind_param($types, ...$waarden);
     }
+    
+    if (!$stmt->execute()) {
+        $stmt->close();
+        $aConn->close();
+        SendResult(1, 'Fout bij update: ' . $stmt->error);
+    }
+    
+    $aantalGewijzigd = $stmt->affected_rows;
+    $stmt->close();
+    return $aantalGewijzigd;
 }
 
 function verwijderenRecord($aConn, $aTabelNaam, $aRecord) {
@@ -107,21 +154,32 @@ function verwijderenRecord($aConn, $aTabelNaam, $aRecord) {
             break;
         }
     }
+    
     if ($idWaarde == '') {
         $aConn->close();
         SendResult(errParameterFout, 'id ontbreekt bij verwijderen');
     }
-    $cmd = sprintf('delete from %s where id = %s',
-        $aTabelNaam,
-        $aConn->real_escape_string($idWaarde));
-    if (!$aConn->query($cmd)) {
+    
+    $cmd = sprintf('delete from %s where id = ?', $aTabelNaam);
+    
+    $stmt = $aConn->prepare($cmd);
+    if (!$stmt) {
         $aConn->close();
-        SendResult(1, 'Fout bij delete: ' . $aConn->error);
+        SendResult(1, 'Fout bij prepare delete: ' . $aConn->error);
     }
-    else {
-        $aantalVerwijderd = $aConn->affected_rows;
-        return $aantalVerwijderd;
+    
+    $type = is_int($idWaarde) ? 'i' : 's';
+    $stmt->bind_param($type, $idWaarde);
+    
+    if (!$stmt->execute()) {
+        $stmt->close();
+        $aConn->close();
+        SendResult(1, 'Fout bij delete: ' . $stmt->error);
     }
+    
+    $aantalVerwijderd = $stmt->affected_rows;
+    $stmt->close();
+    return $aantalVerwijderd;
 }
 
 function bewaarRecord($postData) {
