@@ -17,7 +17,6 @@ class Stuk
 
 
 function PostStuk($aData) {
-//    myLog('Entering PostStuk met data: ' . $aData);
     $stuk = json_decode($aData, false);
     $conn = getDBConnection();
 
@@ -171,7 +170,7 @@ function VerwijderStukVersie($aData) {
     $conn = getDBConnection();
     $myStukVersieId = bepaalStukVersieId($conn, $stuk->stukId, $stuk->versie);
     if ($myStukVersieId == 0) 
-        SendResult(errNietGevonden, "Stukversie van stuk {$stuk->stukId} versie {$stuk->versie} niet gevonden");
+        SendResult(errNietGevonden, "Stukversie van stuk $stuk->stukId versie $stuk->versie niet gevonden");
     else {
 // eerst paginas verwijderen
         $cmd =

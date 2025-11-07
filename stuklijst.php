@@ -42,7 +42,6 @@ function getStukLijst($aVersie, $aSortOrder, $aAlbumFilter, $aAuteurFilter)
         while ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
             $myStuk = new Stuk();
             $myStuk->id = $row["id"];
-            $myStuk->stukVersieId = $row["stukVersieId"];
             $myStuk->titel = $row["titel"];
             $myStuk->map = $row["map"];
             $myStuk->album = $row["album"];
