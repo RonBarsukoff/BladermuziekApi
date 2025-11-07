@@ -13,15 +13,10 @@ require_once('apifuncties.php');
 // }
 // MyLog("Raw input length: " . strlen(file_get_contents('php://input')));
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
+sendHeaders();
 
 $pagina = getGetVar('pagina');
 $postData = file_get_contents('php://input');
 verwerkRequest($pagina, $postData);
 
-function getServerDatumTijd() {
-    echo date("Y-m-d H:i:s");
-}
 ?>

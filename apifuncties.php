@@ -1,5 +1,5 @@
 <?php
-function verwerkRequest($pagina, $postData) {
+function verwerkRequest($pagina, $aPostData) {
     if ($pagina == 'stuklijst') {
         require_once('stuklijst.php');
         $myStukken = getStukLijst(getGetVar('versie', 1), getGetVar('sortorder'), getGetVar('album'), getGetVar('auteur'));
@@ -40,19 +40,24 @@ function verwerkRequest($pagina, $postData) {
         require_once('pagina.php');
         getPaginaByName($naam, $map, getGetVar('hoogte'), getGetVar('breedte'));
     }
-    elseif ($pagina == 'postStuk') {
+    elseif ($pagina == 'postStuk') { // voor gebruik via free pascal
         $postData = getPostVar('stuk');
         if ($postData != '') {
             require_once('stuk.php');
             PostStuk($postData);
         }
-        else {
-            http_response_code(406);
+        else http_response_code(406);
+    }
+    elseif ($pagina == 'bewaarStuk') {  // voor gebruik via webapplicatie
+        if ($aPostData != '') {
+            require_once('stuk.php');
+            PostStuk($aPostData);
         }
-    } elseif ($pagina == 'verwijderStuk') {
-        $postData = getPostVar('stuk');
+        else http_response_code(406);
+    } elseif ($pagina == 'verwijderStukVersie') {
+        // $postData = getPostVar('stuk');
         require_once('stuk.php');
-        VerwijderStuk($postData);
+        VerwijderStukVersie($aPostData);
     } elseif ($pagina == 'serverdatumtijd') {
         getServerDatumTijd();
     }
@@ -96,8 +101,13 @@ function verwerkRequest($pagina, $postData) {
         sendTabel(getGetVar('tabelNaam'));
     }
     elseif ($pagina == 'bewaarRecord') {
-        require_once('tabellen.php');
-        bewaarRecord($postData);
+        $myPostData = $aPostData;
+        if (strlen($myPostData) == 0) 
+            http_response_code(406);
+        else {
+            require_once('tabellen.php');
+            bewaarRecord($myPostData);
+        }
     }
     else {
     #    http_response_code(404);

@@ -1,0 +1,16 @@
+{ 
+    "id" : 0, 
+    "titel" : "Test", 
+    "map" : "Favorite pop piano solos", 
+    "versie" : 1, 
+    "album" : "Piano solos", 
+    "stukVersieId" : 0, 
+    "albumId" : 56, 
+    "nr" : 2, 
+    "auteur" : "De auteur", 
+    "auteurId" : 64, 
+    "paginas" : { "items" : [
+        { "paginanr" : 1, "bestandsnaam" : "book_0005.jpg" }, 
+        { "paginanr" : 2, "bestandsnaam" : "book_0006.jpg" }
+    ] } 
+}

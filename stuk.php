@@ -17,6 +17,7 @@ class Stuk
 
 
 function PostStuk($aData) {
+//    myLog('Entering PostStuk met data: ' . $aData);
     $stuk = json_decode($aData, false);
     $conn = getDBConnection();
 
@@ -163,35 +164,80 @@ function PostStuk($aData) {
     $conn->close();
 }
 
-function VerwijderStuk($aData)
-{
+function VerwijderStukVersie($aData) {
     $stuk = json_decode($aData, false);
+    $myResponse = new stdClass();
     $conn = getDBConnection();
-    if ($stuk->id > 0) {
+    if ($stuk->stukVersieId > 0) {
         // eerst paginas verwijderen
         $cmd =
-            sprintf('delete from %s where %s=? ', tblPagina, vnmStukId);
+            sprintf('delete from %s where %s=? ', tblPagina, vnmStukVersieId);
         $statement = $conn->prepare($cmd);
         if ($statement) {
-            $statement->bind_param('i', $stuk->id);
+            $statement->bind_param('i', $stuk->stukVersieId);
             $statement->execute();
             if ($conn->errno)
                 SendResult(204, 'Fout ' . $conn->errno . ' ' . $conn->error);
+            else
+                $myResponse->aantalPaginasVerwijderd = $statement->affected_rows;
             $statement->close();
         }
-        // dan het stuk
+// eerst het stukId bepalen
         $cmd =
-            sprintf('delete from %s where %s=? ', tblStuk, vnmId);
+            sprintf('select %s from %s where %s=? ', vnmStukId, tblStukVersie, vnmId);
         $statement = $conn->prepare($cmd);
         if ($statement) {
-            $statement->bind_param('i', $stuk->id);
+            $statement->bind_param('i', $stuk->stukVersieId);
+            $statement->execute();
+            $rs = $statement->get_result();
+            if ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
+                $myStukId = $row['stukId'];
+            }
+            $statement->close();
+        } else
+            SendResult(206, "Fout in prepare");
+
+// dan de stukversie
+        $cmd =
+            sprintf('delete from %s where %s=? ', tblStukVersie, vnmId);
+        $statement = $conn->prepare($cmd);
+        if ($statement) {
+            $statement->bind_param('i', $stuk->stukVersieId);
             $statement->execute();
             if ($conn->errno)
                 SendResult(205, 'Fout ' . $conn->errno . ' ' . $conn->error);
-            $statement->close();
-            SendJsonObject($stuk);
+            else
+                $myResponse->stukVersieVerwijderd = true;
+        }
+        $statement->close();
+
+        // controleer of er nog stukversies over zijn
+        $cmd = sprintf('select count(*) as aantal from %s where %s=? ', tblStukVersie, vnmStukId);
+        $statement = $conn->prepare($cmd);
+        if ($statement) {
+            $statement->bind_param('i', $myStukId);
+            $statement->execute();
+            $rs = $statement->get_result();
+            if ($row = $rs->fetch_array(MYSQLI_ASSOC)) {
+                if ($row['aantal'] == 0) {
+                    // geen stukversies meer over, dan ook het stuk verwijderen
+                    $cmd =
+                        sprintf('delete from %s where %s=? ', tblStuk, vnmId);
+                    $statement = $conn->prepare($cmd);
+                    if ($statement) {
+                        $statement->bind_param('i', $myStukId);
+                        $statement->execute();
+                        if ($conn->errno)
+                            SendResult(205, 'Fout ' . $conn->errno . ' ' . $conn->error);
+                        $myResponse->verwijderdStukId = $myStukId;
+                        $statement->close();
+                    } else
+                        SendResult(206, "Fout in prepare");
+                } 
+            } 
         } else
             SendResult(206, "Fout in prepare");
+        SendJsonObject($myResponse);
     }
     $conn->close();
 }

@@ -9,4 +9,13 @@ ADD CONSTRAINT fk_stukAlbumId
 FOREIGN KEY (albumId)
 REFERENCES album(id);
 
+ALTER TABLE stukVersie
+ADD CONSTRAINT fk_stukVersieStukId
+FOREIGN KEY (stukId)
+REFERENCES stuk(id);
+
+ALTER TABLE pagina
+ADD CONSTRAINT fk_paginaStukVersieId
+FOREIGN KEY (stukVersieId)
+REFERENCES stukVersie(id);
 

@@ -2,21 +2,21 @@
 require_once('apiProcs.php');
 require_once('apifuncties.php');
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
+sendHeaders();
 
-$myPostdata = LeesPostData(
-     'postAlbum.json'
-);
+$myPagina = getGetVar('pagina');    
+$myPostdataFilename = './testdata/' . $myPagina . '.json';
+if (!file_exists($myPostdataFilename)) {
+    echo "Testdata file not found: " . $myPostdataFilename;
+}
+else {
+    $myPostdata = LeesPostData($myPostdataFilename);
+    verwerkRequest($myPagina, $myPostdata);
+}
 
-$myPagina = getGetVar('pagina');
-verwerkRequest($myPagina, $myPostdata);
-
-function LeesPostData($aOpdracht) {
-    $myFileName = './testdata/' . $aOpdracht;
-    $myFileHandle = fopen($myFileName, 'r');
-    $myContent = fread($myFileHandle, filesize($myFileName));
+function LeesPostData($aFilename) {
+    $myFileHandle = fopen($aFilename, 'r');
+    $myContent = fread($myFileHandle, filesize($aFilename));
     fclose($myFileHandle);
     return $myContent;
 }
