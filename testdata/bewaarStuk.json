@@ -1,16 +1,14 @@
 { 
-    "id" : 0, 
-    "titel" : "Test", 
-    "map" : "Favorite pop piano solos", 
-    "versie" : 1, 
+    "id" : 582, 
+    "titel" : "Testje met 2e versie", 
+    "map" : "Favorite pop piano solos 2", 
+    "versie" : 2, 
     "album" : "Piano solos", 
-    "stukVersieId" : 0, 
     "albumId" : 56, 
     "nr" : 2, 
-    "auteur" : "De auteur", 
-    "auteurId" : 64, 
+    "auteurId" : 64,
     "paginas" : { "items" : [
-        { "paginanr" : 1, "bestandsnaam" : "book_0005.jpg" }, 
-        { "paginanr" : 2, "bestandsnaam" : "book_0006.jpg" }
+        { "paginanr" : 1, "bestandsnaam" : "book_0005-2.jpg" }, 
+        { "paginanr" : 2, "bestandsnaam" : "book_0006-2.jpg" }
     ] } 
 }
