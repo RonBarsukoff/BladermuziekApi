@@ -61,7 +61,7 @@ function PostStuk($aData) {
     }
 
     // evt stuknummer ophogen
-    if (isset($tuk->albumId)) {
+    if (isset($stuk->albumId)) {
         if (isset($stuk->nr)) {
             if (($stuk->albumId > 0) && ($stuk->nr > 0))
                 OphogenAchterliggendeNummers($stuk->albumId, $stuk->nr, $stuk->id);
