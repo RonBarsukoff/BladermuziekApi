@@ -14,6 +14,17 @@ function getPaginaByName($aNaam, $aMap, $aHoogte, $aBreedte) {
     verstuurImage($aNaam, $aMap, $aHoogte, $aBreedte);
 }
 
+function getPaginaAfmetingen($aNaam, $aMap) {
+    $full_file_name = getDataMap() . '/' . $aMap . '/' . $aNaam;
+    if (is_file($full_file_name)) {
+        list($myBreedte, $myHoogte) = getimagesize($full_file_name);
+        header("Content-Type: application/json; charset=UTF-8");
+        echo json_encode(array('width' => $myBreedte, 'height' => $myHoogte));
+    } else {
+        http_response_code(406);
+    }
+}
+
 function verstuurImage($aFilename, $aMap, $aHoogte, $aBreedte) {
     $full_file_name = getDataMap() . '/' . $aMap . '/' . $aFilename;
     $ext = strtolower(pathinfo($full_file_name, PATHINFO_EXTENSION));

@@ -39,6 +39,11 @@ function verwerkRequest($pagina, $aPostData) {
         $map = getGetVar('map');
         require_once('pagina.php');
         getPaginaByName($naam, $map, getGetVar('hoogte'), getGetVar('breedte'));
+    } elseif ($pagina == 'getPaginaAfmetingen') {
+        $naam = getGetVar('naam');
+        $map = getGetVar('map');
+        require_once('pagina.php');
+        getPaginaAfmetingen($naam, $map);
     }
     elseif ($pagina == 'postStuk') { // voor gebruik via free pascal
         $postData = getPostVar('stuk');
