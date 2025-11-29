@@ -14,15 +14,25 @@ class Mappen
 
 
 function voegMappenToe($pad, $relatiefPad, &$items) {
+    $directories = array();
+    
+    // Verzamel eerst alle directories
     foreach (new DirectoryIterator($pad) as $fileInfo) {
         if (!$fileInfo->isDot() && $fileInfo->isDir()) {
-            $mapNaam = $fileInfo->getFilename();
-            $volgendeRelatiefPad = $relatiefPad === '' ? $mapNaam : $relatiefPad . '/' . $mapNaam;
-            $myMap = new Map();
-            $myMap->naam = $volgendeRelatiefPad;
-            array_push($items, $myMap);
-            voegMappenToe($fileInfo->getPathname(), $volgendeRelatiefPad, $items);
+            $directories[] = $fileInfo->getFilename();
         }
+    }
+    
+    // Sorteer alfabetisch
+    sort($directories);
+    
+    // Voeg toe in alfabetische volgorde
+    foreach ($directories as $mapNaam) {
+        $volgendeRelatiefPad = $relatiefPad === '' ? $mapNaam : $relatiefPad . '/' . $mapNaam;
+        $myMap = new Map();
+        $myMap->naam = $volgendeRelatiefPad;
+        array_push($items, $myMap);
+        voegMappenToe($pad . '/' . $mapNaam, $volgendeRelatiefPad, $items);
     }
 }
 
